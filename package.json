@@ -1,0 +1,20 @@
+{
+  "name": "com.scientificentertainment.websocketclientse",
+  "version": "1.0.0",
+  "displayName": "WebSocketClientSE",
+  "description": "webSocket package",
+  "unity": "2021.1",
+  "keywords": [
+    "WebSocket",
+    "WebSocketClientSE",
+    "ScientificEntertainment"
+  ],
+  "author": {
+    "name": "ScientificEntertainment",
+    "email": "sp@naurasha.ru",
+    "url": "https://nau-ra.ru/"
+  },
+  "dependencies": {
+    "jillejr.newtonsoft.json-for-unity": "12.0.302"
+  }
+}

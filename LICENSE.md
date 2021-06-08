@@ -1,0 +1,1 @@
+WebSocketClientSE license

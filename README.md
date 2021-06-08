@@ -1,1 +1,1 @@
-# WebSocetSE
+Readme about WebSocketClienSE
