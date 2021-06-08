@@ -4,7 +4,18 @@ using System.Linq;
 
 namespace WebSocketSE
 {
-    public class EventSE
+    public abstract class EventSE2 : IResponce, IData, IParticipants
+    {
+
+        EventSE.TypeSE Type => {};
+
+        public List<ParticipantSE> GetParticipants()
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    public class EventSE : IResponce, IData, IParticipants
     {
         private static List<TypeSE> serviceTypes = new List<TypeSE> { TypeSE.ServerResponse, TypeSE.Disconnect, TypeSE.Kick, TypeSE.Close };
         private static List<TypeSE> roomTypes = new List<TypeSE> { TypeSE.ParticipantEnter, TypeSE.ParticipantExit, TypeSE.RolesApplied };
@@ -14,34 +25,106 @@ namespace WebSocketSE
 
         public JObject _jobject;
 
+        public abstract JToken GetData();
+
+        //IType
         public TypeSE Type => type;
         private TypeSE type;
 
+
+        //IDataType
+        private JToken jdata;
+
+
+        //IParticipants
         public List<ParticipantSE> Participants => participants;
         private List<ParticipantSE> participants;
-        public List<ParticipantSE> UpdatedUsers { get; private set; }
 
+
+
+
+        //IUpdate (клиентский)
+        public bool HasUpdate = false;
+        public List<ParticipantSE> Updated { get; private set; }
+        public void SetUpdated(List<ParticipantSE> oldUsers)
+        {
+            Updated = GetUpdated(oldUsers);
+        }
+        private List<ParticipantSE> GetUpdated(List<ParticipantSE> oldUsers)
+        {
+            //todo swich по Type
+            return Participants.Where(current => !oldUsers.Any(old => current.id == old.id)).Concat(oldUsers.Where(old => !Participants.Any(current => old.id == current.id))).ToList();
+        }
+
+
+
+
+        //IRoom
         public string RoomId => roomId;
         private string roomId;
 
+
+
+
+        //IMessage
         private MessageData messageData;
+        public class MessageData
+        {
+            string title;
+            string text;
+
+            public MessageData(string title, string text)
+            {
+                this.title = title;
+                this.text = text;
+            }
+
+            public MessageData(JToken data)
+            {
+                if (data != null)
+                {
+                    title = ((JObject)data).Properties().FirstOrDefault().Name;
+                    text = (string)data[title];
+                }
+                else
+                {
+                    title = text = "";
+                }
+            }
+        }
+
+
+
+
+        //IControl
         private ControlData controlData;
 
-        private JToken jdata;
+
+
+
+
+
         
-        public bool HasUserUpdates = false;
 
         public EventSE(string data)
         {
             _jobject = JObject.Parse(data);
+
+            //IResponce, IType
             type = _jobject["type"].ToObject<TypeSE>();
 
+
+
+            //IDataType
             jdata = dataTypes.Contains(type) ? _jobject["data"] : null;
+
+            //IRoomInfoType
             roomId = roomTypes.Contains(type) ? (string)_jobject["id"] : "-1";
 
+            //IParticipantsType
             if (roomTypes.Contains(type) || type == TypeSE.Control || type == TypeSE.Kick)
             {
-                HasUserUpdates = true;
+                HasUpdate = true;
                 participants = jdata["participants"].ToObject<List<ParticipantSE>>();
             }
 
@@ -53,18 +136,6 @@ namespace WebSocketSE
         {
             return new EventSE(data);
         }
-
-        public void SetUpdatedUsers(List<ParticipantSE> oldUsers)
-        {
-            UpdatedUsers = GetUpdated(oldUsers);
-        }
-
-        private List<ParticipantSE> GetUpdated(List<ParticipantSE> oldUsers)
-        {
-            //todo swich по Type
-            return Participants.Where(current => !oldUsers.Any(old => current.id == old.id)).Concat(oldUsers.Where(old => !Participants.Any(current => old.id == current.id))).ToList();
-        }
-
 
 
         public enum TypeSE
@@ -85,31 +156,9 @@ namespace WebSocketSE
         
     }
 
-    public class MessageData
-    {
-        string title;
-        string text;
 
-        public MessageData(string title, string text)
-        {
-            this.title = title;
-            this.text = text;
-        }
 
-        public MessageData(JToken data)
-        {
-            if (data != null)
-            {
-                title = ((JObject) data).Properties().FirstOrDefault().Name;
-                text = (string) data[title];
-            }
-            else
-            {
-                title = text = "";
-            }
-        }
-    }
-
+    //IControl
     public class ControlData
     {
         bool allow;

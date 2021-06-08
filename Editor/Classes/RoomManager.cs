@@ -56,7 +56,7 @@ namespace WebSocketSE
 				index = FindIndex(room => room.id == id);
 			}
 
-			public void SetUsers(EventSE eventObj)
+			public void SetUsers(IType eventObj)
 			{
 				eventObj.SetUpdatedUsers(users);
 				users = eventObj.Participants;

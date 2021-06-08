@@ -93,10 +93,10 @@ namespace WebSocketSE
 			var Jobject = JObject.Parse(eventData._jobject.ToString());
 			var messageType = Jobject["type"].ToObject<EventSE.TypeSE>();
 
-            if (eventData.HasUserUpdates)
+            /*if (eventData.HasUpdate)
             {
 				RoomManager.UpdateRoom(eventData);
-			}
+			}*/
 
 			TaskDebug(Task.CurrentId.ToString(), "Prc", $"[{eventData.Type}]{eventData._jobject}");
 			OnEventReceive?.Invoke(eventData);
